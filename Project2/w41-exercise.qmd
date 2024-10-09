@@ -40,24 +40,43 @@ plt.show()
 
 
 
-Naïve implementation of gradient descent
+## Plain gradient descent
 
 ```{python}
-def gradient_OLS(X, y, theta, n):
+def gradient_OLS(X, y, theta):
+    n = y.shape[0]
     return -(2.0/n) * X.T @ (y - X @ theta)
 
-XT_X = X.T @ X
-theta_analytical = np.linalg.inv(XT_X) @ X.T @ y
+def gradient_descent(eta, X, y, n_iter, gradient_fun=gradient_OLS, check_converge=False, thresh=0.001):
+    theta = np.random.randn(X.shape[1], 1)
+    for i in range(n_iter):
+        gradient = gradient_fun(X, y, theta)
+        if check_converge:
+            if np.all(np.abs(gradient) < thresh):
+                print(f"Converged for eta={round(eta, 3)} after {i+1} iterations.")
+                return theta
+        theta -= eta * gradient
+    if check_converge:
+        print(f"Did not converge for eta={round(eta, 3)} and {n_iter} iterations.")
+    return theta
 
-np.random.seed(37)
-theta = np.random.randn(X.shape[1], 1)
+
+np.random.seed(50)
+etas = np.linspace(0.01, 0.1, 10)
+n_iter = 1000
+for eta in etas:
+    theta = gradient_descent(eta, X, y, n_iter, check_converge=True)
+    
+```
+
+A learning rate of 0.09 works best for this data, converging after 254 iterations. This was with convergence criterion of all gradients being smaller than 0.001.
+
+```{python}
+theta_analytical = np.linalg.inv(X.T @ X) @ X.T @ y
+np.random.seed(50)
 eta = 0.09
-
-n_iter = 200
-for _ in range(n_iter):
-    gradient = gradient_OLS(X, y, theta, n)
-    theta -= eta * gradient 
-
+n_iter = 254
+theta = gradient_descent(eta, X, y, n_iter)
 
 print("Analytical:")
 print(theta_analytical)
@@ -65,5 +84,40 @@ print("Gradient descent (plain):")
 print(theta)
 ```
 
-Here I tried many different learning rates before landing on 0.09 (not shown).
+## Gradient descent with momentum
+
+```{python}
+# function for momentum
+def momentum_change(eta, gradient, gamma, change):
+    return eta * gradient + gamma * change
+
+# modify for momentum function
+def gradient_descent_momentum(eta, X, y, n_iter, gamma, gradient_fun=gradient_OLS, check_converge=False, thresh=0.001):
+    theta = np.random.randn(X.shape[1], 1)
+    change = 0
+    for i in range(n_iter):
+        gradient = gradient_fun(X, y, theta)
+        if check_converge:
+            if np.all(np.abs(gradient) < thresh):
+                print(f"Converged for eta={round(eta, 3)} after {i+1} iterations.")
+                return theta
+        new_change = momentum_change(eta, gradient, gamma, change)
+        change = new_change
+        theta -= new_change
+
+    if check_converge:
+        print(f"Did not converge for eta={round(eta, 3)} and {n_iter} iterations.")
+    return theta
+
+np.random.seed(50)
+gamma = 0.7
+n_iter = 200
+np.random.seed(50)
+etas = np.linspace(0.01, 0.1, 10)
+n_iter = 1000
+for eta in etas:
+    theta = gradient_descent_momentum(eta, X, y, n_iter, gamma, check_converge=True)
+```
+
+For $\gamma=0.7$, the algorithm converges much faster than without momentum, and converges for the whole range of learning rates.
 
