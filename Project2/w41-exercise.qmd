@@ -252,31 +252,31 @@ def RMSProp(update_term, gradient, Giter, rho, delta=1e-8):
     update = update_term / (delta+np.sqrt(Giter))
     return Giter, update
 
-def GD(X, y, eta, n_iter, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, **kwargs):
-    theta = np.random.randn(X.shape[1], 1)
+def GD_inner(X, y, eta, theta, Giter, change, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, **kwargs):
+    gradient = gradient_fun(X, y, theta)
     adaptive = adaptive_fun is not None
 
-    if adaptive:
-        Giter = 0.0
+    update = eta * gradient
     if momentum:
-        if gamma is None:
-            from sys import exit
-            exit("Momentum function specified, but gamma is None.")
-        change = 0.0
+        update += gamma * change
+        change = update
+    if adaptive:
+        Giter, update = adaptive_fun(update, gradient, Giter, **kwargs)
+    
+    theta -= update
+    return theta, Giter, change
+
+def GD(X, y, eta, n_iter, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, **kwargs):
+    theta = np.random.randn(X.shape[1], 1)
+    Giter = 0.0
+    change = 0.0
 
     for i in range(n_iter):
-        gradient = gradient_fun(X, y, theta)
-        update = 0.0
-
-        update = eta * gradient
-        if momentum:
-            update += gamma * change
-            change = update
-        if adaptive:
-            Giter, update = adaptive_fun(update, gradient, Giter, **kwargs)
-
-        theta -= update
+        theta, change, Giter = GD_inner(X, y, eta, theta, Giter, change, gradient_fun, momentum, gamma, adaptive_fun, **kwargs)
     return theta
+
+
+
 eta = 0.09
 n_iter = 100
 
