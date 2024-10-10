@@ -65,7 +65,7 @@ def GD(X, y, eta, n_iter, gradient_fun=gradient_OLS,
             theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, **kwargs)
     return theta
 
-def SGD(X, y, eta, M, n_epochs, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, adam=False, **kwargs):
+def SGD(X, y, eta, M, n_epochs, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, adam=False, gradient_args={}, **kwargs):
     n = y.shape[0]
     m = int(n/M)
     xy = np.column_stack([X,y]) # for shuffling x and y together
@@ -81,7 +81,7 @@ def SGD(X, y, eta, M, n_epochs, gradient_fun=gradient_OLS, momentum=False, gamma
             random_index = M * np.random.randint(m)
             xi = xy[random_index:random_index+5, :-1]
             yi = xy[random_index:random_index+5, -1:]
-            gradient = (1/M)*gradient_fun(xi, yi, theta)
+            gradient = (1/M)*gradient_fun(xi, yi, theta, **gradient_args)
             if adam:
                 theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam,  itr = i+1, **kwargs)
             else:
