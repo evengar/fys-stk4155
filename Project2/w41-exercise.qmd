@@ -121,3 +121,71 @@ for eta in etas:
 
 For $\gamma=0.7$, the algorithm converges much faster than without momentum, and converges for the whole range of learning rates.
 
+## Stochastic gradient descent
+
+We implement stochastic gradient descent, which helps with avoiding getting stuck in local minima.
+
+```{python}
+def SGD(X, y, eta, gradient_fun, n_epochs, M):
+    n = y.shape[0]
+    m = int(n/M)
+    xy = np.column_stack([X,y]) # for shuffling x and y together
+    theta = np.random.randn(X.shape[1], 1)
+
+    for i in range(n_epochs):
+        np.random.shuffle(xy)
+        for j in range(m):
+            random_index = M * np.random.randint(m)
+            xi = xy[random_index:random_index+5, :-1]
+            yi = xy[random_index:random_index+5, -1:]
+            gradient = gradient_fun(xi, yi, theta)
+            theta = theta - eta*gradient
+    return theta
+
+np.random.seed(39)
+eta = 0.01
+n_epochs = 100
+M = 5        # minibatch size
+
+
+theta = SGD(X, y, eta, gradient_OLS, n_epochs, M)
+
+print(theta)
+print(theta_analytical)
+
+```
+
+### SGD with momentum
+
+
+```{python}
+def SGD_momentum(X, y, eta, gradient_fun, n_epochs, M, gamma):
+    n = y.shape[0]
+    m = int(n/M)
+    xy = np.column_stack([X,y]) # for shuffling x and y together
+    theta = np.random.randn(X.shape[1], 1)
+
+    change = 0
+    for i in range(n_epochs):
+        np.random.shuffle(xy)
+        for j in range(m):
+            random_index = M * np.random.randint(m)
+            xi = xy[random_index:random_index+5, :-1]
+            yi = xy[random_index:random_index+5, -1:]
+            gradient = gradient_fun(xi, yi, theta)
+            new_change = momentum_change(eta, gradient, gamma, change)
+            theta = theta - new_change
+            change = new_change
+    return theta
+
+np.random.seed(60)
+eta = 0.01
+gamma = 0.3
+n_epochs = 50
+M = 5        # minibatch size
+
+theta = SGD_momentum(X, y, eta, gradient_OLS, n_epochs, M, gamma)
+
+print(theta)
+print(theta_analytical)
+```
