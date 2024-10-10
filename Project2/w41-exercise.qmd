@@ -291,7 +291,10 @@ def GD(X, y, eta, n_iter, gradient_fun=gradient_OLS, momentum=False, gamma=None,
 
     for i in range(n_iter):
         gradient = gradient_fun(X, y, theta)
-        theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, **kwargs, itr = i+1)
+        if adam:
+            theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, itr = i+1, **kwargs)
+        else:
+            theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, **kwargs)
     return theta
 
 def SGD(X, y, eta, M, n_epochs, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, adam=False, **kwargs):
@@ -311,7 +314,10 @@ def SGD(X, y, eta, M, n_epochs, gradient_fun=gradient_OLS, momentum=False, gamma
             xi = xy[random_index:random_index+5, :-1]
             yi = xy[random_index:random_index+5, -1:]
             gradient = (1/M)*gradient_fun(xi, yi, theta)
-            theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, **kwargs, itr = i+1)
+            if adam:
+                theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam,  itr = i+1, **kwargs)
+            else:
+                theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, **kwargs)
     return theta
 ```
 
