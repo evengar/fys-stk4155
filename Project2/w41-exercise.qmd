@@ -1,5 +1,5 @@
 ---
-title: Exercises week 41
+title: Exercises week 41 (exploration)
 subtitle: FYS-STK4155
 author: Even Sletteng Garvang
 format: pdf
