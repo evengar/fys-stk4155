@@ -252,31 +252,80 @@ def RMSProp(update_term, gradient, Giter, rho, delta=1e-8):
     update = update_term / (delta+np.sqrt(Giter))
     return Giter, update
 
-def GD_inner(X, y, eta, theta, Giter, change, gradient, momentum=False, gamma=None, adaptive_fun=None, **kwargs):
+def ADAM(gradient, first_moment, second_moment, beta1, beta2, itr, delta=1e-8):
+    first_moment = beta1*first_moment + (1-beta1)*gradient
+    second_moment = beta2*second_moment + (1-beta2)*gradient*gradient
+
+    first_term = first_moment/(1.0-beta1**itr)
+    second_term = second_moment/(1.0-beta2**itr)
+    update = eta*first_term/(np.sqrt(second_term)+delta)
+
+    return first_moment, second_moment, update
+
+def GD_inner(eta, theta, moments, gradient, momentum=False, gamma=None, adaptive_fun=None, adam = False, **kwargs):
     adaptive = adaptive_fun is not None
 
-    update = eta * gradient
-    if momentum:
-        update += gamma * change
-        change = update
-    if adaptive:
-        Giter, update = adaptive_fun(update, gradient, Giter, **kwargs)
+    if adam:
+        first_moment, second_moment = moments
+        first_moment, second_moment, update = ADAM(gradient, first_moment, second_moment, **kwargs)
+        theta -= update
+        return theta, first_moment, second_moment
+    else:
+        Giter, change = moments
+        update = eta * gradient
+        if momentum:
+            update += gamma * change
+            change = update
+        if adaptive:
+            Giter, update = adaptive_fun(update, gradient, Giter, **kwargs)
     
     theta -= update
     return theta, Giter, change
 
-def GD(X, y, eta, n_iter, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, **kwargs):
+def GD(X, y, eta, n_iter, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, adam=False, **kwargs):
     theta = np.random.randn(X.shape[1], 1)
-    Giter = 0.0
-    change = 0.0
+    
+    # moment 1 and 2 of ADAM
+    # Giter and change if not ADAM
+    moments = [0, 0]
 
     for i in range(n_iter):
         gradient = gradient_fun(X, y, theta)
-        theta, Giter, change = GD_inner(X, y, eta, theta, Giter, change, gradient, momentum, gamma, adaptive_fun, **kwargs)
+        theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, **kwargs, itr = i+1)
     return theta
 
+def SGD(X, y, eta, M, n_epochs, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, **kwargs):
+    n = y.shape[0]
+    m = int(n/M)
+    xy = np.column_stack([X,y]) # for shuffling x and y together
+    theta = np.random.randn(X.shape[1], 1)
+    Giter = 0.0
+    change = 0.0
+    first_moment = 0.0
+    second_moment = 0.0
 
+    for i in range(n_epochs):
+        Giter = 0.0
+        np.random.shuffle(xy)
+        for j in range(m):
+            random_index = M * np.random.randint(m)
+            xi = xy[random_index:random_index+5, :-1]
+            yi = xy[random_index:random_index+5, -1:]
+            gradient = (1/M)*gradient_fun(xi, yi, theta)
+            theta, Giter, change = GD_inner(eta, theta, Giter, change, gradient, momentum, gamma, adaptive_fun, **kwargs)
+    return theta
+```
 
+```{python}
+eta = 0.5
+n_iter = 1000
+beta1 = 0.9
+beta2 = 0.999
+theta = GD(X, y, eta, n_iter, adam=True, beta1=beta1, beta2=beta2)
+print(theta)
+```
+
+```{python}
 eta = 0.09
 n_iter = 100
 
@@ -305,6 +354,25 @@ print(theta_adagrad_momentum)
 theta_rmsprop = GD(X, y, eta=10, n_iter=n_iter, adaptive_fun=RMSProp, rho=0.99)
 print("RMSProp")
 print(theta_rmsprop)
+```
 
 
+```{python}
+eta = 0.09
+M = 5
+n_epochs = 50
+# test SGD
+theta = SGD(X, y, eta, M, n_epochs)
+theta_momentum = SGD(X, y, eta, M, n_epochs, momentum=True, gamma = 0.3)
+
+print(theta)
+print(theta_momentum)
+
+eta = 10
+theta_adagrad = SGD(X, y, eta, M, n_epochs, adaptive_fun=AdaGrad)
+theta_adagrad_momentum = SGD(X, y, eta, M, n_epochs, momentum=True, gamma = 0.3, adaptive_fun=AdaGrad)
+
+print("Adagrad:")
+print(theta_adagrad)
+print(theta_adagrad_momentum)
 ```
