@@ -252,8 +252,7 @@ def RMSProp(update_term, gradient, Giter, rho, delta=1e-8):
     update = update_term / (delta+np.sqrt(Giter))
     return Giter, update
 
-def GD_inner(X, y, eta, theta, Giter, change, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, **kwargs):
-    gradient = gradient_fun(X, y, theta)
+def GD_inner(X, y, eta, theta, Giter, change, gradient, momentum=False, gamma=None, adaptive_fun=None, **kwargs):
     adaptive = adaptive_fun is not None
 
     update = eta * gradient
@@ -272,7 +271,8 @@ def GD(X, y, eta, n_iter, gradient_fun=gradient_OLS, momentum=False, gamma=None,
     change = 0.0
 
     for i in range(n_iter):
-        theta, change, Giter = GD_inner(X, y, eta, theta, Giter, change, gradient_fun, momentum, gamma, adaptive_fun, **kwargs)
+        gradient = gradient_fun(X, y, theta)
+        theta, Giter, change = GD_inner(X, y, eta, theta, Giter, change, gradient, momentum, gamma, adaptive_fun, **kwargs)
     return theta
 
 
