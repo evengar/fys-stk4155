@@ -635,7 +635,7 @@ mse_sgd_ridge = eta_lambda_grid(
 
 ```{python}
 #| label: fig-sgd-franke
-#| fig-cap: BONUS. the same methods applied to the Franke function. NB: log scale on golor scale, unlike all previous figures ...
+#| fig-cap: BONUS. the same methods applied to the Franke function. Note log scale on color gradient, unlike all previous figures ...
 #| cache: true
 from matplotlib.colors import LogNorm
 lmb_lab = ["{0:.2e}".format(x) for x in lmbs]
