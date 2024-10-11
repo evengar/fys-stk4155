@@ -8,17 +8,17 @@ def gradient_ridge(X, y, theta, lmb):
     n = y.shape[0]
     return 2.0/n * X.T @ (X @ theta-y) + 2*lmb*theta
 
-def AdaGrad(update_term, gradient, Giter, delta = 1e-8):
+def AdaGrad(update_term, gradient, Giter, delta = 1e-8, **kwargs):
     Giter += gradient*gradient
     update = update_term / (delta + np.sqrt(Giter))
     return Giter, update
 
-def RMSProp(update_term, gradient, Giter, rho, delta=1e-8):
+def RMSProp(update_term, gradient, Giter, rho, delta=1e-8, **kwargs):
     Giter = rho*Giter + (1-rho)*gradient*gradient
     update = update_term / (delta+np.sqrt(Giter))
     return Giter, update
 
-def ADAM(gradient, first_moment, second_moment, beta1, beta2, itr, delta=1e-8):
+def ADAM(eta, gradient, first_moment, second_moment, beta1, beta2, itr, delta=1e-8, **kwargs):
     first_moment = beta1*first_moment + (1-beta1)*gradient
     second_moment = beta2*second_moment + (1-beta2)*gradient*gradient
 
@@ -28,12 +28,13 @@ def ADAM(gradient, first_moment, second_moment, beta1, beta2, itr, delta=1e-8):
 
     return first_moment, second_moment, update
 
-def GD_inner(eta, theta, moments, gradient, momentum=False, gamma=None, adaptive_fun=None, adam = False, **kwargs):
+def GD_inner(eta, theta, moments, gradient, momentum=False, 
+             gamma=None, adaptive_fun=None, adam = False, **kwargs):
     adaptive = adaptive_fun is not None
 
     if adam:
         first_moment, second_moment = moments
-        first_moment, second_moment, update = ADAM(gradient, first_moment, second_moment, **kwargs)
+        first_moment, second_moment, update = ADAM(eta, gradient, first_moment, second_moment, **kwargs)
         theta -= update
         return theta, first_moment, second_moment
     else:
@@ -59,10 +60,10 @@ def GD(X, y, eta, n_iter, gradient_fun=gradient_OLS,
 
     for i in range(n_iter):
         gradient = gradient_fun(X, y, theta, **gradient_args)
-        if adam:
-            theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, itr = i+1, **kwargs)
-        else:
-            theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, **kwargs)
+        theta, moments[0], moments[1] = GD_inner(
+            eta, theta, moments, gradient, momentum, gamma, 
+            adaptive_fun, adam, itr = i+1, **kwargs
+            )
     return theta
 
 def SGD(X, y, eta, M, n_epochs, gradient_fun=gradient_OLS, momentum=False, gamma=None, adaptive_fun=None, adam=False, gradient_args={}, **kwargs):
@@ -82,8 +83,8 @@ def SGD(X, y, eta, M, n_epochs, gradient_fun=gradient_OLS, momentum=False, gamma
             xi = xy[random_index:random_index+5, :-1]
             yi = xy[random_index:random_index+5, -1:]
             gradient = (1/M)*gradient_fun(xi, yi, theta, **gradient_args)
-            if adam:
-                theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam,  itr = i+1, **kwargs)
-            else:
-                theta, moments[0], moments[1] = GD_inner(eta, theta, moments, gradient, momentum, gamma, adaptive_fun, adam, **kwargs)
+            theta, moments[0], moments[1] = GD_inner(
+                eta, theta, moments, gradient, momentum, gamma, 
+                adaptive_fun, adam,  itr = i+1, **kwargs
+                )
     return theta
