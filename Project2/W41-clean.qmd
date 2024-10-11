@@ -9,6 +9,8 @@ format: pdf
 
 I have made my own implementations of gradient descent (GD) and stochastic gradient descent (SGD) with and without memory and with different adaptive gradient techniques. The exploration of GD and validation of the implementation can be found at <https://github.com/evengar/fys-stk4155/blob/main/Project2/w41-exercise.pdf> (work-in-progress). Here I focus on applying the techniques to a simple data set with polynomial features using gradients from ordinary least squares (OLS) and Ridge regression.
 
+The functions for gradient descent and utility functions are contained in `gdfuns.py` and `utils.py`, respectively, available at <https://github.com/evengar/fys-stk4155/tree/main/Project2>
+
 ## Preparation
 
 Import libraries, gradient descent functions and utility functions.
