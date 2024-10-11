@@ -65,7 +65,10 @@ Here we have polynomials up to degree 10, while our data is generated from degre
 ### Polynomial degree
 
 ```{python}
-def GD_poly_mse(X_train, X_test, y_train, y_test, maxpoly, minpoly = 1, gd_fun = GD, **kwargs):
+def GD_poly_mse(
+    X_train, X_test, y_train, y_test,
+    maxpoly, minpoly = 1, gd_fun = GD, **kwargs
+    ):
     polys = np.arange(minpoly-1, maxpoly) + 1
     mse = np.zeros(len(polys))
 
@@ -94,11 +97,15 @@ n_iter = 200
 M = 5
 n_epochs = 50
 
-mse_gd = GD_poly_mse(X_train_scaled, X_test_scaled, y_train, y_test, 
-                     maxpoly, eta = eta, n_iter = n_iter)
+mse_gd = GD_poly_mse(
+    X_train_scaled, X_test_scaled, y_train, y_test, 
+    maxpoly, eta = eta, n_iter = n_iter
+    )
 
-mse_sgd = GD_poly_mse(X_train_scaled, X_test_scaled, y_train, y_test, 
-                      maxpoly, gd_fun=SGD, eta = eta, n_epochs = n_epochs, M = M)
+mse_sgd = GD_poly_mse(
+    X_train_scaled, X_test_scaled, y_train, y_test, 
+    maxpoly, gd_fun=SGD, eta = eta, n_epochs = n_epochs, M = M
+    )
 
 polys = np.arange(maxpoly) + 1
 plt.plot(polys, mse_gd, label = f"GD, {n_iter} iterations")
@@ -127,13 +134,17 @@ n_epochs = 50
 # momentum parameter
 gamma = 0.3
 
-mse_gd = GD_poly_mse(X_train_scaled, X_test_scaled, y_train, y_test, 
-                     maxpoly, eta = eta, n_iter = n_iter, 
-                     momentum = True, gamma = gamma)
+mse_gd = GD_poly_mse(
+    X_train_scaled, X_test_scaled, y_train, y_test, 
+    maxpoly, eta = eta, n_iter = n_iter, 
+    momentum = True, gamma = gamma
+    )
 
-mse_sgd = GD_poly_mse(X_train_scaled, X_test_scaled, y_train, y_test, 
-                      maxpoly, gd_fun=SGD, eta = eta, n_epochs = n_epochs, M = M, 
-                      momentum = True, gamma = gamma)
+mse_sgd = GD_poly_mse(
+    X_train_scaled, X_test_scaled, y_train, y_test, 
+    maxpoly, gd_fun=SGD, eta = eta, n_epochs = n_epochs, M = M, 
+    momentum = True, gamma = gamma
+    )
 
 polys = np.arange(maxpoly) + 1
 plt.plot(polys, mse_gd, label = f"GD, {n_iter} iterations")
@@ -148,12 +159,16 @@ plt.show()
 ### Learning rates
 
 ```{python}
-def eta_poly_grid(X_train, X_test, y_train, y_test, etas, maxpoly, minpoly = 1, **kwargs):
+def eta_poly_grid(
+    X_train, X_test, y_train, y_test, 
+    etas, maxpoly, minpoly = 1, **kwargs
+    ):
     npoly = maxpoly - (minpoly - 1)
     mse = np.zeros( (npoly, len(etas)) )
     for i in range(len(etas)):
-        mse_eta = GD_poly_mse(X_train_scaled, X_test_scaled, y_train, y_test, 
-                        maxpoly, minpoly=minpoly, eta = etas[i], **kwargs)
+        mse_eta = GD_poly_mse(
+            X_train_scaled, X_test_scaled, y_train, y_test, 
+            maxpoly, minpoly=minpoly, eta = etas[i], **kwargs)
         mse[:,i] = mse_eta
     return mse
 
@@ -178,9 +193,11 @@ n_iter = 200
 # momentum parameter
 gamma = 0.3
 
-mse = eta_poly_grid(X_train_scaled, X_test_scaled, y_train, y_test, 
-              etas, maxpoly, n_iter = n_iter, minpoly=minpoly, 
-              momentum = True, gamma = gamma)
+mse = eta_poly_grid(
+    X_train_scaled, X_test_scaled, y_train, y_test, 
+    etas, maxpoly, n_iter = n_iter, minpoly=minpoly, 
+    momentum = True, gamma = gamma
+    )
 ```
 
 ```{python}
@@ -191,7 +208,6 @@ plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
 plt.yticks(np.arange(len(polys)) + 0.5, polys)
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel("Maximum polydegree")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 ```
 
@@ -217,9 +233,11 @@ n_epochs = 50
 # momentum parameter
 gamma = 0.3
 
-mse = eta_poly_grid(X_train_scaled, X_test_scaled, y_train, y_test, 
-              etas, maxpoly, gd_fun=SGD, n_epochs = n_epochs, M=M, minpoly=minpoly, 
-              momentum = True, gamma = gamma)
+mse = eta_poly_grid(
+    X_train_scaled, X_test_scaled, y_train, y_test, 
+    etas, maxpoly, gd_fun=SGD, n_epochs = n_epochs, M=M, minpoly=minpoly, 
+    momentum = True, gamma = gamma
+    )
 ```
 
 ```{python}
@@ -230,7 +248,6 @@ plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
 plt.yticks(np.arange(len(polys)) + 0.5, polys)
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel("Maximum polydegree")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 ```
 
@@ -248,11 +265,16 @@ GD and SGD performs similarly for this data and the OLS gradient.
 We repeat some of the steps above, but with gradient from the Ridge cost function. We settle for a constant polynomial degree of 10, and instead look at the interaction of learning rate and $\lambda$. We also do all gradient descents in this part with momentum.
 
 ```{python}
-def GD_lambda_mse(X_train, X_test, y_train, y_test, lmbs, 
-                  gd_fun = GD, gradient_fun=gradient_ridge, **kwargs):
+def GD_lambda_mse(
+    X_train, X_test, y_train, y_test, lmbs, 
+    gd_fun = GD, gradient_fun=gradient_ridge, **kwargs
+    ):
     mse=np.zeros(len(lmbs))
     for i in range(len(lmbs)):
-        theta = gd_fun(X_train, y_train, gradient_fun=gradient_ridge, gradient_args={"lmb":lmbs[i]}, **kwargs)
+        theta = gd_fun(
+            X_train, y_train, gradient_fun=gradient_ridge, 
+            gradient_args={"lmb":lmbs[i]}, **kwargs
+            )
         y_pred = X_test @ theta
         mse[i] = mean_squared_error(y_test, y_pred)
     return mse
@@ -277,11 +299,15 @@ n_epochs = 50
 # momentum parameter
 gamma = 0.3
 
-mse_gd_ridge = GD_lambda_mse(xtrain, xtest, y_train_scaled, y_test_scaled, lmbs, eta = eta, 
-                             n_iter = n_iter, momentum = True, gamma = gamma)
+mse_gd_ridge = GD_lambda_mse(
+    xtrain, xtest, y_train_scaled, y_test_scaled, lmbs, eta = eta, 
+    n_iter = n_iter, momentum = True, gamma = gamma
+    )
 
-mse_sgd_ridge = GD_lambda_mse(xtrain, xtest, y_train_scaled, y_test_scaled, lmbs, eta = eta, 
-                             n_epochs=n_epochs, M=M, gd_fun=SGD, momentum = True, gamma = gamma)
+mse_sgd_ridge = GD_lambda_mse(
+    xtrain, xtest, y_train_scaled, y_test_scaled, lmbs, eta = eta, 
+    n_epochs=n_epochs, M=M, gd_fun=SGD, momentum = True, gamma = gamma
+    )
 
 
 plt.plot(lmbs, mse_gd_ridge, label = f"GD, {n_iter} iterations")
@@ -296,10 +322,16 @@ plt.show()
 No obvious patterns in lambdas, other than that it seems better to keep it below ca. $10^{-3}$. Try a grid of lambdas and learning rates:
 
 ```{python}
-def eta_lambda_grid(X_train, X_test, y_train, y_test, etas, lmbs, **kwargs):
+def eta_lambda_grid(
+    X_train, X_test, y_train, y_test,
+    etas, lmbs, **kwargs
+    ):
     mse = np.zeros( (len(lmbs), len(etas)) )
     for i in range(len(etas)):
-        mse_eta = GD_lambda_mse(X_train_scaled, X_test_scaled, y_train, y_test, lmbs, eta = etas[i], **kwargs)
+        mse_eta = GD_lambda_mse(
+            X_train_scaled, X_test_scaled, y_train, y_test, 
+            lmbs, eta = etas[i], **kwargs
+            )
         mse[:,i] = mse_eta
     return mse
 ```
@@ -317,11 +349,17 @@ n_epochs = 50
 # momentum parameter
 gamma = 0.3
 
-mse_gd_ridge = eta_lambda_grid(xtrain, xtest, y_train_scaled, y_test_scaled, etas, lmbs, 
-                             n_iter = n_iter, momentum = True, gamma = gamma)
+mse_gd_ridge = eta_lambda_grid(
+    xtrain, xtest, y_train_scaled, y_test_scaled, 
+    etas, lmbs, n_iter = n_iter, 
+    momentum = True, gamma = gamma
+    )
 
-mse_sgd_ridge = eta_lambda_grid(xtrain, xtest, y_train_scaled, y_test_scaled, etas, lmbs, 
-                             n_epochs=n_epochs, M=M, gd_fun=SGD, momentum = True, gamma = gamma)
+mse_sgd_ridge = eta_lambda_grid(
+    xtrain, xtest, y_train_scaled, y_test_scaled,
+    etas, lmbs, n_epochs=n_epochs, M=M, gd_fun=SGD, 
+    momentum = True, gamma = gamma
+    )
 ```
 
 ```{python}
@@ -334,18 +372,16 @@ lmb_lab = ["{0:.2e}".format(x) for x in lmbs]
 
 sns.heatmap(mse_gd_ridge)
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 
 sns.heatmap(mse_sgd_ridge)
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 ```
 
@@ -367,13 +403,19 @@ n_epochs = 50
 # momentum parameter
 gamma = 0.3
 
-mse_gd_ridge = eta_lambda_grid(xtrain, xtest, y_train_scaled, y_test_scaled, etas, lmbs, 
-                               n_iter = n_iter, momentum = True, gamma = gamma, 
-                               adaptive_fun=AdaGrad)
+mse_gd_ridge = eta_lambda_grid(
+    xtrain, xtest, y_train_scaled, y_test_scaled,
+    etas, lmbs, n_iter = n_iter, 
+    momentum = True, gamma = gamma, 
+    adaptive_fun=AdaGrad
+    )
 
-mse_sgd_ridge = eta_lambda_grid(xtrain, xtest, y_train_scaled, y_test_scaled, etas, lmbs, 
-                             n_epochs=n_epochs, M=M, gd_fun=SGD, momentum = True, gamma = gamma,
-                             adaptive_fun=AdaGrad)
+mse_sgd_ridge = eta_lambda_grid(
+    xtrain, xtest, y_train_scaled, y_test_scaled, 
+    etas, lmbs, n_epochs=n_epochs, M=M, gd_fun=SGD, 
+    momentum = True, gamma = gamma, 
+    adaptive_fun=AdaGrad
+    )
 ```
 
 ```{python}
@@ -386,18 +428,16 @@ lmb_lab = ["{0:.2e}".format(x) for x in lmbs]
 
 sns.heatmap(mse_gd_ridge)
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 
 sns.heatmap(mse_sgd_ridge)
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 ```
 
@@ -424,13 +464,19 @@ gamma = 0.3
 # RMSProp parameter
 rho=0.99
 
-mse_gd_ridge = eta_lambda_grid(xtrain, xtest, y_train_scaled, y_test_scaled, etas, lmbs, 
-                               n_iter = n_iter, momentum = True, gamma = gamma, 
-                               adaptive_fun=RMSProp, rho=rho)
+mse_gd_ridge = eta_lambda_grid(
+    xtrain, xtest, y_train_scaled, y_test_scaled, 
+    etas, lmbs, n_iter = n_iter, 
+    momentum = True, gamma = gamma, 
+    adaptive_fun=RMSProp, rho=rho
+    )
 
-mse_sgd_ridge = eta_lambda_grid(xtrain, xtest, y_train_scaled, y_test_scaled, etas, lmbs, 
-                             n_epochs=n_epochs, M=M, gd_fun=SGD, momentum = True, gamma = gamma,
-                             adaptive_fun=RMSProp, rho=rho)
+mse_sgd_ridge = eta_lambda_grid(
+    xtrain, xtest, y_train_scaled, y_test_scaled,
+     etas, lmbs, n_epochs=n_epochs, M=M, gd_fun=SGD, 
+     momentum = True, gamma = gamma,
+     adaptive_fun=RMSProp, rho=rho
+     )
 ```
 
 ```{python}
@@ -443,18 +489,16 @@ lmb_lab = ["{0:.2e}".format(x) for x in lmbs]
 
 sns.heatmap(mse_gd_ridge)
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 
 sns.heatmap(mse_sgd_ridge)
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 ```
 
@@ -478,13 +522,17 @@ n_epochs = 50
 beta1 = 0.9
 beta2 = 0.999
 
-mse_gd_ridge = eta_lambda_grid(xtrain, xtest, y_train_scaled, y_test_scaled, etas, lmbs, 
-                               n_iter = n_iter,
-                               adam=True, beta1 = beta1, beta2 = beta2)
+mse_gd_ridge = eta_lambda_grid(
+    xtrain, xtest, y_train_scaled, y_test_scaled, 
+    etas, lmbs, n_iter = n_iter,
+    adam=True, beta1 = beta1, beta2 = beta2
+    )
 
-mse_sgd_ridge = eta_lambda_grid(xtrain, xtest, y_train_scaled, y_test_scaled, etas, lmbs, 
-                             n_epochs=n_epochs, M=M, gd_fun=SGD, 
-                             adam=True, beta1 = beta1, beta2 = beta2)
+mse_sgd_ridge = eta_lambda_grid(
+    xtrain, xtest, y_train_scaled, y_test_scaled, 
+    etas, lmbs, n_epochs=n_epochs, M=M, gd_fun=SGD, 
+    adam=True, beta1 = beta1, beta2 = beta2
+    )
 ```
 
 ```{python}
@@ -497,18 +545,16 @@ lmb_lab = ["{0:.2e}".format(x) for x in lmbs]
 
 sns.heatmap(mse_gd_ridge)
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 
 sns.heatmap(mse_sgd_ridge)
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
-#plt.title(f"CV MSE ($k={k}$)")
 plt.show()
 ```
 
@@ -564,9 +610,7 @@ y_test_scaled = scalery.transform(y_test)
 Arbitrarily choose ADAM to use on the data
 
 ```{python}
-#| label: fig-sgd-franke
-#| fig-cap: BONUS. the same methods applied to the Franke function.
-#| cache: true
+
 eta = 0.2
 n_iter = 200
 lmbs=np.logspace(-12,-2,20)
@@ -579,19 +623,24 @@ n_epochs = 50
 # Adam parameters
 beta1 = 0.9
 beta2 = 0.999
-mse_sgd_ridge = eta_lambda_grid(X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled, 
-                                etas, lmbs, 
-                                n_epochs=n_epochs, M=M, gd_fun=SGD, 
-                                adam=True, beta1 = beta1, beta2 = beta2)
+mse_sgd_ridge = eta_lambda_grid(
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled, 
+    etas, lmbs, n_epochs=n_epochs, M=M, gd_fun=SGD,
+    adam=True, beta1 = beta1, beta2 = beta2
+    )
 ```
 
 
 ```{python}
+#| label: fig-sgd-franke
+#| fig-cap: BONUS. the same methods applied to the Franke function. NB: log scale on golor scale, unlike all previous figures ...
+#| cache: true
+from matplotlib.colors import LogNorm
 lmb_lab = ["{0:.2e}".format(x) for x in lmbs]
 
-sns.heatmap(mse_sgd_ridge)
+sns.heatmap(mse_sgd_ridge, norm=LogNorm())
 plt.xticks(np.arange(len(etas))[::4] + 0.5, np.round(etas, 3)[::4])
-plt.yticks(np.arange(len(lmbs))[::4] + 0.5, lmb_lab[::4])
+plt.yticks(np.arange(len(lmbs))[::5] + 0.5, lmb_lab[::5])
 plt.xlabel(r"Learning rate $\eta$")
 plt.ylabel(r"$\lambda$")
 #plt.title(f"CV MSE ($k={k}$)")
