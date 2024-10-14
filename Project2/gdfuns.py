@@ -6,7 +6,7 @@ def gradient_OLS(X, y, theta):
 
 def gradient_ridge(X, y, theta, lmb):
     n = y.shape[0]
-    return 2.0/n * X.T @ (X @ theta-y) + 2*lmb*theta
+    return -(2.0/n) * X.T @ (y - X @ theta) + 2*lmb*theta
 
 def AdaGrad(update_term, gradient, Giter, delta = 1e-8, **kwargs):
     Giter += gradient*gradient
