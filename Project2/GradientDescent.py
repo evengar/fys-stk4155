@@ -12,9 +12,9 @@ class ADAM:
         self.first_moment = 0.0
         self.second_moment = 0.0
 
-    def calculate(self, learning_rate, gradient, current_iter):
-        self.first_moment = self.beta1*self.first_moment + (1-self.beta1)*gradient
-        self.second_moment = self.beta2*self.second_moment + (1-self.beta2)*gradient*gradient
+    def calculate(self, learning_rate, grad, current_iter):
+        self.first_moment = self.beta1*self.first_moment + (1-self.beta1)*grad
+        self.second_moment = self.beta2*self.second_moment + (1-self.beta2)*grad*grad
 
         first_term = self.first_moment/(1.0-self.beta1**current_iter)
         second_term = self.second_moment/(1.0-self.beta2**current_iter)
@@ -24,9 +24,33 @@ class ADAM:
 
 
 
-#class AdaGrad:
+class AdaGrad:
+    def __init__(self, delta = 1e-8):
+        self.delta = delta
+        self.Giter = 0.0
 
-#class RMSProp:
+    def reset(self):
+        self.Giter = 0.0
+    
+    def calculate(self, learning_rate, grad, current_iter):
+        self.Giter += grad*grad
+        update = learning_rate * grad / (self.delta + np.sqrt(self.Giter))
+        return update
+
+
+class RMSProp:
+    def __init__(self, rho, delta = 1e-8):
+        self.rho = rho
+        self.delta = delta
+        self.Giter = 0.0
+
+    def reset(self):
+        self.Giter = 0.0
+    
+    def calculate(self, learning_rate, grad, current_iter):
+        self.Giter = self.rho*self.Giter + (1-self.rho)*grad*grad
+        update = learning_rate * grad / (self.delta+np.sqrt(self.Giter))
+        return update
 
 def grad_OLS():
     def grad_fun(X, y, theta):
@@ -42,15 +66,18 @@ def grad_ridge(lmb):
 
 
 class GradientDescent:
-    def __init__(self, learning_rate, gradient, momentum = False, adaptive = None, n_iter = 1000):
+    def __init__(self, learning_rate, gradient, momentum = False, momentum_gamma = None, adaptive = None, n_iter = 1000):
         self.learning_rate = learning_rate
         self.gradient = gradient
         self.momentum = momentum
+        self.momentum_gamma = momentum_gamma
         self.adaptive = adaptive
         self.n_iter = n_iter
         self.theta = None
         self.n = None
         if self.momentum:
+            if self.momentum_gamma is None:
+                raise Exception("Error: no gamma specified for momentum")
             self.momentum_change = 0.0
     def _initialize_vars(self, X):
         self.theta = np.random.randn(X.shape[1], 1)
@@ -60,7 +87,7 @@ class GradientDescent:
         if self.adaptive is None:
             update = self.learning_rate * grad
             if self.momentum:
-                update += gamma * self.momentum_change
+                update += self.momentum_gamma * self.momentum_change
                 self.momentum_change = update
         else:
             update = self.adaptive.calculate(self.learning_rate, grad, current_iter)

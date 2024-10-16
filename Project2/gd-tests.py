@@ -33,7 +33,7 @@ y_test_scaled = scalerx.transform(y_test)
 
 # initialize parameters
 eta = 0.09
-n_iter = 2000
+n_iter = 200
 grad = grad_OLS()
 
 gd = GradientDescent(eta, grad, n_iter = n_iter)
@@ -41,8 +41,26 @@ gd = GradientDescent(eta, grad, n_iter = n_iter)
 gd.descend(X, y)
 print(gd.theta)
 
-adam = ADAM()
+gamma = 0.3
 
+gd_momentum = GradientDescent(eta, grad, n_iter = n_iter, momentum = True, momentum_gamma = 0.3)
+gd_momentum.descend(X, y)
+print(gd_momentum.theta)
+
+eta = 2
+
+adam = ADAM()
 gd_ADAM = GradientDescent(eta, grad, n_iter = n_iter, adaptive = adam)
 gd_ADAM.descend(X, y)
 print(gd_ADAM.theta)
+
+adagrad = AdaGrad()
+gd_AdaGrad = GradientDescent(eta, grad, n_iter = n_iter, adaptive = adagrad)
+gd_AdaGrad.descend(X, y)
+print(gd_AdaGrad.theta)
+
+rho = 0.99
+rmsprop = RMSProp(rho = 0.99)
+gd_RMSProp = GradientDescent(eta, grad, n_iter = n_iter, adaptive = rmsprop)
+gd_RMSProp.descend(X, y)
+print(gd_RMSProp.theta)
