@@ -36,31 +36,43 @@ eta = 0.09
 n_iter = 200
 grad = grad_OLS()
 
-gd = GradientDescent(eta, grad, n_iter = n_iter)
+gd = GradientDescent(eta, grad)
 
-gd.descend(X, y)
-print(gd.theta)
+gd.descend(X, y, n_iter = n_iter)
+print("Regular", gd.theta, sep = "\n")
 
 gamma = 0.3
 
-gd_momentum = GradientDescent(eta, grad, n_iter = n_iter, momentum = True, momentum_gamma = 0.3)
-gd_momentum.descend(X, y)
-print(gd_momentum.theta)
+gd_momentum = GradientDescent(eta, grad, momentum = True, momentum_gamma = 0.3)
+gd_momentum.descend(X, y, n_iter = n_iter)
+print("Momentum", gd_momentum.theta, sep = "\n")
 
 eta = 2
 
 adam = ADAM()
-gd_ADAM = GradientDescent(eta, grad, n_iter = n_iter, adaptive = adam)
-gd_ADAM.descend(X, y)
-print(gd_ADAM.theta)
+gd_ADAM = GradientDescent(eta, grad, adaptive = adam)
+gd_ADAM.descend(X, y, n_iter = n_iter)
+print("ADAM",gd_ADAM.theta, sep = "\n")
 
 adagrad = AdaGrad()
-gd_AdaGrad = GradientDescent(eta, grad, n_iter = n_iter, adaptive = adagrad)
-gd_AdaGrad.descend(X, y)
-print(gd_AdaGrad.theta)
+gd_AdaGrad = GradientDescent(eta, grad, adaptive = adagrad)
+gd_AdaGrad.descend(X, y, n_iter = n_iter)
+print("AdaGrad", gd_AdaGrad.theta, sep = "\n")
 
 rho = 0.99
 rmsprop = RMSProp(rho = 0.99)
-gd_RMSProp = GradientDescent(eta, grad, n_iter = n_iter, adaptive = rmsprop)
-gd_RMSProp.descend(X, y)
-print(gd_RMSProp.theta)
+gd_RMSProp = GradientDescent(eta, grad, adaptive = rmsprop)
+gd_RMSProp.descend(X, y, n_iter = n_iter)
+print("RMSProp", gd_RMSProp.theta, sep = "\n")
+
+# SGD
+eta = 0.09
+grad = grad_OLS()
+
+M = 5
+n_epochs = 50
+
+gd = GradientDescent(eta, grad)
+
+gd.descend_stochastic(X, y, n_epochs = n_epochs, batch_size = M)
+print("Stochastic regular", gd.theta, sep = "\n")

@@ -66,18 +66,17 @@ def grad_ridge(lmb):
 
 
 class GradientDescent:
-    def __init__(self, learning_rate, gradient, momentum = False, momentum_gamma = None, adaptive = None, n_iter = 1000):
+    def __init__(self, learning_rate, gradient, momentum = False, momentum_gamma = None, adaptive = None):
         self.learning_rate = learning_rate
         self.gradient = gradient
         self.momentum = momentum
         self.momentum_gamma = momentum_gamma
         self.adaptive = adaptive
-        self.n_iter = n_iter
         self.theta = None
         self.n = None
         if self.momentum:
             if self.momentum_gamma is None:
-                raise Exception("Error: no gamma specified for momentum")
+                raise Exception("No gamma specified for momentum")
             self.momentum_change = 0.0
     def _initialize_vars(self, X):
         self.theta = np.random.randn(X.shape[1], 1)
@@ -94,11 +93,26 @@ class GradientDescent:
 
         return update
 
-    def descend(self, X, y):
+    def descend(self, X, y, n_iter=500):
         self._initialize_vars(X)
-        for i in range(self.n_iter):
+        for i in range(n_iter):
             grad = self.gradient(X, y, self.theta)
             update = self._gd(grad, X, y, i+1)
             self.theta -= update
 
+    def descend_stochastic(self, X, y, n_epochs = 50, batch_size = 5):
+        self._initialize_vars(X)
+        n_batches = int(self.n / batch_size)
+        xy = np.column_stack([X,y]) # for shuffling x and y together
+        for i in range(n_epochs):
+            if self.adaptive is not None:
+                adaptive.reset()
+            np.random.shuffle(xy)
+            for j in range(n_batches):
+                random_index = batch_size * np.random.randint(n_batches)
+                xi = xy[random_index:random_index+5, :-1]
+                yi = xy[random_index:random_index+5, -1:]
+                grad = (1/batch_size) * self.gradient(X, y, self.theta)
+                update = self._gd(grad, xi, yi, current_iter = j+1)
+                self.theta -= update
 
