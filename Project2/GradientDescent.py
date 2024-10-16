@@ -106,7 +106,7 @@ class GradientDescent:
         xy = np.column_stack([X,y]) # for shuffling x and y together
         for i in range(n_epochs):
             if self.adaptive is not None:
-                adaptive.reset()
+                self.adaptive.reset()
             np.random.shuffle(xy)
             for j in range(n_batches):
                 random_index = batch_size * np.random.randint(n_batches)

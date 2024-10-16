@@ -76,3 +76,8 @@ gd = GradientDescent(eta, grad)
 
 gd.descend_stochastic(X, y, n_epochs = n_epochs, batch_size = M)
 print("Stochastic regular", gd.theta, sep = "\n")
+
+adam = ADAM()
+gd_ADAM = GradientDescent(eta, grad, adaptive = adam)
+gd_ADAM.descend_stochastic(X, y, n_epochs = n_epochs, batch_size = M)
+print("Stochastic ADAM",gd_ADAM.theta, sep = "\n")
