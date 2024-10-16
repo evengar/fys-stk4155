@@ -1,3 +1,5 @@
+import numpy as np
+
 class ADAM:
     def __init__(self, beta1=0.9, beta2=0.999, delta=1e-8):
         self.beta1 = beta1
@@ -22,31 +24,54 @@ class ADAM:
 
 
 
-class AdaGrad:
+#class AdaGrad:
 
-class RMSProp:
+#class RMSProp:
 
 def grad_OLS():
     def grad_fun(X, y, theta):
         n = y.shape[0]
-        return -(2.0/n) * X.T @ (y - X @ theta)
+        return (2.0/n) * X.T @ (X @ theta - y)
     return grad_fun
 
 def grad_ridge(lmb):
     def grad_fun(X, y, theta):
         n = y.shape[0]
-        return -(2.0/n) * X.T @ (y - X @ theta) + 2*lmb*theta
+        return -(2.0/n) * X.T @ (X @ theta - y) + 2*lmb*theta
     return(grad_fun)
 
 
 class GradientDescent:
-    def __init__(
-        self, 
-        gradient,
-        n_iter = 1000,
-
-        **gradient_args
-        ):
+    def __init__(self, learning_rate, gradient, momentum = False, adaptive = None, n_iter = 1000):
+        self.learning_rate = learning_rate
         self.gradient = gradient
-        self.gradient_args = gradient_args
+        self.momentum = momentum
+        self.adaptive = adaptive
+        self.n_iter = n_iter
         self.theta = None
+        self.n = None
+        if self.momentum:
+            self.momentum_change = 0.0
+    def _initialize_vars(self, X):
+        self.theta = np.random.randn(X.shape[1], 1)
+        self.n = X.shape[0]
+
+    def _gd(self, grad, X, y, current_iter):
+        if self.adaptive is None:
+            update = self.learning_rate * grad
+            if self.momentum:
+                update += gamma * self.momentum_change
+                self.momentum_change = update
+        else:
+            update = self.adaptive.calculate(self.learning_rate, grad, current_iter)
+
+        return update
+
+    def descend(self, X, y):
+        self._initialize_vars(X)
+        for i in range(self.n_iter):
+            grad = self.gradient(X, y, self.theta)
+            update = self._gd(grad, X, y, i+1)
+            self.theta -= update
+
+
